@@ -1,0 +1,258 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background: #0a0a0a;
+    color: #e0e0e0;
+    line-height: 1.6;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+#glCanvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+}
+
+nav {
+    position: fixed;
+    top: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 0.5rem;
+    z-index: 100;
+    background: rgba(15, 15, 15, 0.8);
+    padding: 0.5rem;
+    border-radius: 8px;
+    backdrop-filter: blur(10px);
+}
+
+.nav-btn {
+    background: transparent;
+    border: none;
+    color: #666;
+    padding: 0.75rem 1.5rem;
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.nav-btn:hover {
+    color: #e0e0e0;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.nav-btn.active {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.container {
+    position: relative;
+    z-index: 10;
+    max-width: 900px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 8rem 2rem 2rem;
+    min-height: 100vh;
+}
+
+.hero {
+    text-align: center;
+}
+
+h1 {
+    font-size: 3rem;
+    font-weight: 300;
+    letter-spacing: -1px;
+    margin-bottom: 0.5rem;
+    color: #fff;
+}
+
+.subtitle {
+    color: #888;
+    font-size: 1.125rem;
+    font-weight: 300;
+    margin-bottom: 3rem;
+}
+
+.stats {
+    display: flex;
+    justify-content: center;
+    gap: 4rem;
+    margin-top: 3rem;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.number {
+    font-size: 3rem;
+    font-weight: 300;
+    color: #fff;
+}
+
+.label {
+    font-size: 0.875rem;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+h2 {
+    font-size: 2rem;
+    font-weight: 400;
+    margin-bottom: 3rem;
+    color: #fff;
+}
+
+h3 {
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #666;
+    margin-bottom: 1rem;
+}
+
+.cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid #1a1a1a;
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: #333;
+    transform: translateY(-5px);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.card h3 {
+    font-size: 1.125rem;
+    font-weight: 500;
+    color: #fff;
+    text-transform: none;
+    letter-spacing: 0;
+    margin: 0;
+}
+
+.badge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.badge.dev {
+    background: rgba(59, 130, 246, 0.2);
+    color: #60a5fa;
+}
+
+.badge.owner {
+    background: rgba(168, 85, 247, 0.2);
+    color: #c084fc;
+}
+
+.card-desc {
+    color: #888;
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+.contact-links {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    max-width: 600px;
+}
+
+.contact-item {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.3s ease;
+    border: 1px solid #1a1a1a;
+}
+
+.contact-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: #333;
+    transform: translateX(8px);
+}
+
+.icon {
+    font-size: 2rem;
+}
+
+.contact-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.contact-label {
+    font-size: 0.75rem;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.contact-value {
+    color: #e0e0e0;
+    font-size: 1rem;
+}
+
+@media (max-width: 600px) {
+    h1 {
+        font-size: 2rem;
+    }
+    
+    .stats {
+        gap: 2rem;
+    }
+    
+    .number {
+        font-size: 2.5rem;
+    }
+    
+    .cards {
+        grid-template-columns: 1fr;
+    }
+}
