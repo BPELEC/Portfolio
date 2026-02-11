@@ -1,75 +1,167 @@
 const canvas = document.getElementById('glCanvas');
-const gl = canvas.getContext('webgl');
+const ctx = canvas.getContext('2d');
 
-let time = 0;
+let particles = [];
+let mouse = { x: window.innerWidth / 2, y: window.innerHeight / 2, radius: 150 };
+let follower = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+let clickEffects = [];
+let initialized = false;
 
 function resizeCanvas() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-    gl.viewport(0, 0, canvas.width, canvas.height);
+    if (!initialized) {
+        mouse.x = canvas.width / 2;
+        mouse.y = canvas.height / 2;
+        follower.x = canvas.width / 2;
+        follower.y = canvas.height / 2;
+        initialized = true;
+    }
+    initParticles();
 }
 
-const vertexShaderSource = `
-    attribute vec2 position;
-    void main() {
-        gl_Position = vec4(position, 0.0, 1.0);
+class Particle {
+    constructor() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.vx = (Math.random() - 0.5) * 0.5;
+        this.vy = (Math.random() - 0.5) * 0.5;
+        this.radius = 2;
     }
-`;
 
-const fragmentShaderSource = `
-    precision mediump float;
-    uniform float time;
-    uniform vec2 resolution;
-    
-    void main() {
-        vec2 uv = gl_FragCoord.xy / resolution;
-        vec3 color = vec3(0.04, 0.04, 0.04);
-        
-        float wave = sin(uv.x * 10.0 + time * 0.5) * cos(uv.y * 10.0 + time * 0.3) * 0.02;
-        
-        color += wave;
-        gl_FragColor = vec4(color, 1.0);
+    update() {
+        this.x += this.vx;
+        this.y += this.vy;
+
+        if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+        if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
     }
-`;
 
-function createShader(type, source) {
-    const shader = gl.createShader(type);
-    gl.shaderSource(shader, source);
-    gl.compileShader(shader);
-    return shader;
+    draw() {
+        ctx.fillStyle = '#444';
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fill();
+    }
 }
 
-const vertexShader = createShader(gl.VERTEX_SHADER, vertexShaderSource);
-const fragmentShader = createShader(gl.FRAGMENT_SHADER, fragmentShaderSource);
+class ClickEffect {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.radius = 0;
+        this.maxRadius = 50;
+        this.opacity = 1;
+    }
 
-const program = gl.createProgram();
-gl.attachShader(program, vertexShader);
-gl.attachShader(program, fragmentShader);
-gl.linkProgram(program);
-gl.useProgram(program);
+    update() {
+        this.radius += 2;
+        this.opacity -= 0.02;
+    }
 
-const vertices = new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]);
-const buffer = gl.createBuffer();
-gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+    draw() {
+        ctx.strokeStyle = `rgba(100, 100, 100, ${this.opacity})`;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.stroke();
+    }
+}
 
-const position = gl.getAttribLocation(program, 'position');
-gl.enableVertexAttribArray(position);
-gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0);
+function initParticles() {
+    particles = [];
+    const numParticles = Math.floor((canvas.width * canvas.height) / 15000);
+    for (let i = 0; i < numParticles; i++) {
+        particles.push(new Particle());
+    }
+}
 
-const timeUniform = gl.getUniformLocation(program, 'time');
-const resolutionUniform = gl.getUniformLocation(program, 'resolution');
+function connectParticles() {
+    for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+            const dx = particles[i].x - particles[j].x;
+            const dy = particles[i].y - particles[j].y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance < 120) {
+                ctx.strokeStyle = `rgba(68, 68, 68, ${1 - distance / 120})`;
+                ctx.lineWidth = 0.5;
+                ctx.beginPath();
+                ctx.moveTo(particles[i].x, particles[i].y);
+                ctx.lineTo(particles[j].x, particles[j].y);
+                ctx.stroke();
+            }
+        }
+
+        if (mouse.x !== null) {
+            const dx = particles[i].x - mouse.x;
+            const dy = particles[i].y - mouse.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance < mouse.radius) {
+                ctx.strokeStyle = `rgba(100, 100, 100, ${1 - distance / mouse.radius})`;
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(particles[i].x, particles[i].y);
+                ctx.lineTo(mouse.x, mouse.y);
+                ctx.stroke();
+            }
+        }
+    }
+}
+
+function drawMouseFollower() {
+    if (mouse.x !== null && initialized) {
+        follower.x += (mouse.x - follower.x) * 0.1;
+        follower.y += (mouse.y - follower.y) * 0.1;
+
+        ctx.fillStyle = 'rgba(100, 100, 100, 0.4)';
+        ctx.beginPath();
+        ctx.arc(follower.x, follower.y, 12, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = 'rgba(120, 120, 120, 0.6)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(follower.x, follower.y, 18, 0, Math.PI * 2);
+        ctx.stroke();
+    }
+}
 
 function animate() {
-    time += 0.016;
-    
-    gl.uniform1f(timeUniform, time);
-    gl.uniform2f(resolutionUniform, canvas.width, canvas.height);
-    
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    particles.forEach(p => {
+        p.update();
+        p.draw();
+    });
+
+    connectParticles();
+    drawMouseFollower();
+
+    clickEffects = clickEffects.filter(effect => effect.opacity > 0);
+    clickEffects.forEach(effect => {
+        effect.update();
+        effect.draw();
+    });
+
     requestAnimationFrame(animate);
 }
 
-resizeCanvas();
 window.addEventListener('resize', resizeCanvas);
+window.addEventListener('mousemove', (e) => {
+    mouse.x = e.x;
+    mouse.y = e.y;
+});
+
+window.addEventListener('mouseout', () => {
+    mouse.x = null;
+    mouse.y = null;
+});
+
+window.addEventListener('click', (e) => {
+    clickEffects.push(new ClickEffect(e.x, e.y));
+});
+
+resizeCanvas();
 animate();
